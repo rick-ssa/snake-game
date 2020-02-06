@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body onload='setEventHandle()'>
+
+        <div id='board'>
+            <span id='food' style='left:216px' class='food'>
+                <i class="fas fa-apple-alt"></i>
+            </span>
+
+            <span id='special-food' style='left:300px' class='special-food'>
+                <i class="fas fa-hamburger fa-spin"></i>
+            </span>
+            <span id='snake-head'>
+                <i id='head' class="fas fa-grin fa-rotate-90"></i>
+            </span>
+            
+        </div>
+        
+        
+        
+        <script src="js/main.js"></script>
+        <script src="https://kit.fontawesome.com/0c1222ab3a.js" crossorigin="anonymous"></script>
+        <script> 
+            showFood() 
+            move(actualDirection).then(resp=>resp).then(resp=>{handleTimerMove=resp})
+        </script>
+    </body>
+</html>

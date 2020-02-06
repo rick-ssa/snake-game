@@ -1,0 +1,38 @@
+ /* write your style definitions here or create css files and include them here */
+
+ * {
+    box-sizing: border-box;
+}
+
+#board {
+    position: fixed;
+    width: 800px;
+    height: 800px;
+    background-color: #8eedf7;
+}
+
+#snake-head {
+    position: absolute;
+    font-size: 16px;
+    color: #9d695a;
+}
+
+.snake-body {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background-color: rgba(157,105,90,0.9);
+    border: 1px solid black;
+}
+
+.food {
+    position: absolute;
+    color: #d496a7;
+    font-size: 16px;
+}
+
+.special-food {
+    position:absolute;
+    color: black;
+    font-size: 28px;
+}
