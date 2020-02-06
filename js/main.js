@@ -4,12 +4,13 @@ const DIR_DOWN = 2;
 const DIR_RIGHT = 1;
 const DIR_UP = 0;
 
-const SNAKE_SPEED = 500;
+const SNAKE_SPEED = 100;
 
 const NONE_COLISION = 0;
 const FOOD_COLISION = 1;
 const SPECIAL_FOOD_COLISION = 2;
 const BORDER_COLISION = 3;
+const SELF_COLISION = 4;
 
 
 let snake = []
@@ -52,9 +53,10 @@ async function move(direction){
             return v
         })
 
-        document.getElementById('colision').innerHTML = 'colisão: ' + detectColision();
-        document.getElementById('direction').innerHTML = 'direção: ' + actualDirection
-        
+        if (detectColision()===FOOD_COLISION) {
+            addSegmentToSnake(1,beforeLeft,beforeTop)
+        }
+        console.log(detectColision())
         move(actualDirection).then(resp=>{handleTimerMove=resp})
     
     },SNAKE_SPEED)
@@ -162,7 +164,31 @@ function detectColision(){
        head.offsetTop + 16 === board.offsetHeight) {
             return BORDER_COLISION
     }
+
+    if(snake.filter((v,i)=>{
+        if(i!==0) {
+            if (v.offsetLeft===head.offsetLeft &&
+                v.offsetTop===head.offsetTop) {
+                    return true
+                }
+        }
+    }).length>0) {
+        return SELF_COLISION
+    }
     
 
     return NONE_COLISION
+}
+
+function addSegmentToSnake(number, left, top) {
+    let segment = document.createElement('i')
+    segment.classList.add('fas')
+    segment.classList.add('fa-square')
+    segment.classList.add('snake-body')
+    segment.style.left = left;
+    segment.style.top = top
+
+    document.getElementById('board').appendChild(segment)
+
+    snake.push(segment)
 }
