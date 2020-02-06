@@ -5,6 +5,8 @@ const DIR_RIGHT = 2;
 const DIR_UP = 3;
 const SNAKE_SPEED = 100;
 
+const SNAKE = []
+
 let handleTimerMove;
 
 let actualDirection = DIR_RIGHT
@@ -55,11 +57,16 @@ async function hideFood(special) {
     },timer * 1000)
 }
 
+function config_init() {
+    setEventHandle()
+    SNAKE.push(document.getElementById('head'))
+}
+
 function setEventHandle() {
     
     document.addEventListener("keydown",(e)=>{
         
-        const head = document.getElementById('head')
+        const head = SNAKE[0]
         clearTimerMove()
         switch (e.key) {
             case 'ArrowRight':
@@ -91,7 +98,7 @@ function clearTimerMove() {
 }
 
 function clearRotateHead() {
-    const head = document.getElementById('head')
+    const head = SNAKE[0]
     if (head.classList.contains('fa-rotate-90')) {
         head.classList.remove('fa-rotate-90')
     }
@@ -102,4 +109,8 @@ function clearRotateHead() {
     if (head.classList.contains('fa-rotate-270')) {
         head.classList.remove('fa-rotate-270')
     }
+}
+
+function detectColision(){
+
 }
