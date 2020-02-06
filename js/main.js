@@ -3,7 +3,14 @@ const DIR_LEFT = 0;
 const DIR_DOWN = 1;
 const DIR_RIGHT = 2;
 const DIR_UP = 3;
-const SNAKE_SPEED = 100;
+
+const SNAKE_SPEED = 500;
+
+const NONE_COLISION = 0;
+const FOOD_COLISION = 1;
+const SPECIAL_FOOD_COLISION = 2;
+const BORDER_COLISION = 3;
+
 
 let snake = []
 
@@ -44,6 +51,9 @@ async function move(direction){
             }
             return v
         })
+
+        document.getElementById('colision').innerHTML = 'colisão: ' + detectColision();
+        document.getElementById('direction').innerHTML = 'direção: ' + actualDirection
         
         move(actualDirection).then(resp=>{handleTimerMove=resp})
     
@@ -131,5 +141,28 @@ function clearRotateHead() {
 }
 
 function detectColision(){
+    let food = document.getElementById('food')
+    let head = snake[0]
+    let specialFood = document.getElementById('special-food')
+    let board = document.getElementById('board')
 
+    if (head.style.left === food.style.left && 
+        head.style.top === food.style.top ) {
+            return FOOD_COLISION;
+    }
+
+    if ((head.offsetLeft >= specialFood.offsetLeft && head.offsetLeft <= specialFood.offsetLeft + 28) && 
+        (head.offsetTop >= specialFood.offsetTop && head.offsetTop <= specialFood.offsetTop + 28)) {
+            return SPECIAL_FOOD_COLISION
+    }
+
+    if(head.offsetLeft === board.offsetLeft ||
+       head.offsetTop === board.offsetTop ||
+       head.offsetLeft + 16 === board.offsetWidth ||
+       head.offsetTop + 16 === board.offsetHeight) {
+            return BORDER_COLISION
+    }
+    
+
+    return NONE_COLISION
 }
