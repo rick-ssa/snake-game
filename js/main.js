@@ -5,15 +5,18 @@ const DIR_RIGHT = 2;
 const DIR_UP = 3;
 const SNAKE_SPEED = 100;
 
-const SNAKE = []
+let snake = []
 
 let handleTimerMove;
 
 let actualDirection = DIR_RIGHT
 
 async function move(direction){
+    
     return await setTimeout(()=>{
-        const head = document.getElementById('snake-head')
+        let head = snake[0]
+        let beforeLeft = head.style.left
+        let beforeTop = head.style.top
         switch (direction) {
             case DIR_RIGHT:
                 head.style.left = head.offsetLeft + 16 + 'px';
@@ -28,6 +31,19 @@ async function move(direction){
                 head.style.top = head.offsetTop - 16 + 'px';
                 break;
         }
+
+        snake = snake.map((v,i)=>{
+            if(i!==0) {
+                let tempL = v.style.left
+                let tempT = v.style.top
+                v.style.left = beforeLeft
+                v.style.top = beforeTop
+
+                beforeLeft = tempL
+                beforeTop = tempT
+            }
+            return v
+        })
         
         move(actualDirection).then(resp=>{handleTimerMove=resp})
     
@@ -59,14 +75,16 @@ async function hideFood(special) {
 
 function config_init() {
     setEventHandle()
-    SNAKE.push(document.getElementById('head'))
+    snake.push(document.getElementById('snake-head'))
+    showFood() 
+    move(actualDirection).then(resp=>resp).then(resp=>{handleTimerMove=resp})
 }
 
 function setEventHandle() {
     
     document.addEventListener("keydown",(e)=>{
         
-        const head = SNAKE[0]
+        const head = snake[0]
         clearTimerMove()
         switch (e.key) {
             case 'ArrowRight':
@@ -98,7 +116,8 @@ function clearTimerMove() {
 }
 
 function clearRotateHead() {
-    const head = SNAKE[0]
+    const head = snake[0]
+    
     if (head.classList.contains('fa-rotate-90')) {
         head.classList.remove('fa-rotate-90')
     }

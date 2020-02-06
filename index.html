@@ -12,16 +12,15 @@
     <body onload='config_init()'>
 
         <div id='board'>
-            <span id='food' style='left:216px' class='food'>
-                <i class="fas fa-apple-alt"></i>
-            </span>
-
-            <span id='special-food' style='left:300px' class='special-food'>
-                <i class="fas fa-hamburger fa-spin"></i>
-            </span>
-            <span id='snake-head'>
-                <i id='head' class="fas fa-grin fa-rotate-90"></i>
-            </span>
+            
+            <i id='food' style='left:216px' class="fas fa-apple-alt"></i id='food' style='left:216px'>
+        
+    
+            <i id='special-food' style='left:300px' class="fas fa-hamburger fa-spin"></i>
+        
+        
+            <i id='snake-head' class="fas fa-grin fa-rotate-90"></i>
+        
             
         </div>
         
@@ -30,8 +29,7 @@
         <script src="js/main.js"></script>
         <script src="https://kit.fontawesome.com/0c1222ab3a.js" crossorigin="anonymous"></script>
         <script> 
-            showFood() 
-            move(actualDirection).then(resp=>resp).then(resp=>{handleTimerMove=resp})
+            
         </script>
     </body>
 </html>

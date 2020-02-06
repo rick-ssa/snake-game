@@ -25,13 +25,13 @@
     border: 1px solid black;
 }
 
-.food {
+#food {
     position: absolute;
     color: #d496a7;
     font-size: 16px;
 }
 
-.special-food {
+#special-food {
     position:absolute;
     color: black;
     font-size: 28px;
