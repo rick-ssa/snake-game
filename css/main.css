@@ -21,10 +21,8 @@
 
 .snake-body {
     position: absolute;
-    width: 16px;
-    height: 16px;
-    background-color: rgba(157,105,90,0.9);
-    border: 1px solid black;
+    font-size: 16px;;
+    color: #9d695a;
 }
 
 #food {
