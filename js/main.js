@@ -1,8 +1,8 @@
 /* Javascript */
-const DIR_LEFT = 0;
-const DIR_DOWN = 1;
-const DIR_RIGHT = 2;
-const DIR_UP = 3;
+const DIR_LEFT = 3;
+const DIR_DOWN = 2;
+const DIR_RIGHT = 1;
+const DIR_UP = 0;
 
 const SNAKE_SPEED = 500;
 
@@ -60,7 +60,7 @@ async function move(direction){
     },SNAKE_SPEED)
 }
 
-async function showFood(special) {
+async function showFood(special=false) {
         let food
         if (special) {
             food = document.getElementById('special-food')
