@@ -53,9 +53,14 @@ async function move(direction){
             return v
         })
 
-        if (detectColision()===FOOD_COLISION) {
-            addSegmentToSnake(1,beforeLeft,beforeTop)
+        switch (detectColision){
+            case FOOD_COLISION:
+                addSegmentToSnake(1,beforeLeft,beforeTop)
+                break;
+            case SPECIAL_FOOD_COLISION:
+                
         }
+
         console.log(detectColision())
         move(actualDirection).then(resp=>{handleTimerMove=resp})
     
