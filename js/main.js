@@ -41,6 +41,8 @@ let actualDirection = DIR_RIGHT
 
 let isSpecialFood = true
 
+let score = 0
+
 function config_init() {
     setEventHandle()
     snake.push(document.getElementById('snake-head'))
@@ -88,12 +90,15 @@ async function move(direction){
                 addSegmentToSnake(1,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
+                score++
                 break;
             case SPECIAL_FOOD_COLISION:
                 console.log('hi')
                 addSegmentToSnake(2,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
+                score+= 9
+                break
         }
 
         move(actualDirection).then(resp=>{handleTimerMove=resp})
