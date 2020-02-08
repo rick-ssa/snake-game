@@ -15,8 +15,8 @@ const SELF_COLISION = 4;
 const MIN_SHOW_TIME_FOOD = 4
 const MAX_SHOW_TIME_FOOD = 10
 
-const MIN_SHOW_TIME_SPECIAL_FOOD = 4
-const MAX_SHOW_TIME_SPECIAL_FOOD = 10
+const MIN_SHOW_TIME_SPECIAL_FOOD = 1
+const MAX_SHOW_TIME_SPECIAL_FOOD = 5
 
 const FOOD_SIZE = 16;
 const SPECIAL_FOOD_SIZE = 28;
@@ -39,7 +39,7 @@ let handleTimerTurnOnSpecialFood;
 
 let actualDirection = DIR_RIGHT
 
-let isSpecialFood = true
+let isSpecialFood = false
 
 let score = 0
 
@@ -118,7 +118,6 @@ async function showFood(special=false) {
             food = document.getElementById('special-food-container')
             otherFood = document.getElementById('food')
             foodSize = SPECIAL_FOOD_SIZE
-            console.log(food.childNodes[1])
             food.childNodes[1].classList.remove(`fa-${lastSpecialFoodType}`)
             lastSpecialFoodType = SPECIAL_FOOD_TYPE[Math.floor(Math.random() * 9)]
             food.childNodes[1].classList.add(`fa-${lastSpecialFoodType}`)
@@ -139,8 +138,6 @@ async function showFood(special=false) {
         food.style.left=left + 'px';
         food.style.top=top + 'px';
 
-        document.getElementById('direction').innerHTML = `${left}, ${top}`
-
         moveFood(minTime,maxTime).then((resp)=>{handleTimerMoveFood=resp})
 }
 
@@ -149,7 +146,7 @@ async function moveFood(minTime, maxTime) {
     
     return await setTimeout(()=>{
         showFood(isSpecialFood)
-        // isSpecialFood = isSpecialFood ? false : isSpecialFood
+        isSpecialFood = isSpecialFood ? false : isSpecialFood
     },timer * 1000)
 }
 
