@@ -21,6 +21,11 @@ const MAX_SHOW_TIME_SPECIAL_FOOD = 5
 const FOOD_SIZE = 16;
 const SPECIAL_FOOD_SIZE = 28;
 
+const GAME_STATUS_STOPED = 0
+const GAME_STATUS_PLAY = 1
+const GAME_STATUS_PAUSE = 2
+const GAME_STATUS_OVER = 3
+
 SPECIAL_FOOD_TYPE = ['hamburger','carrot','fish','drumstick-bite',
                       'egg','cheese','hotdog','ice-cream', 'pizza-slice']
 
@@ -43,12 +48,11 @@ let isSpecialFood = false
 
 let score = 0
 
+let gameStatus = GAME_STATUS_STOPED
+
 function config_init() {
     setEventHandle()
     snake.push(document.getElementById('snake-head'))
-    showFood(isSpecialFood) 
-    turnOnSpecialFood().then(resp=>{handleTimerTurnOnSpecialFood=resp})
-    move(actualDirection).then(resp=>{handleTimerMove=resp})
 }
 
 async function move(direction){
@@ -83,22 +87,22 @@ async function move(direction){
                 beforeTop = tempT
             }
             return v
-        })
+        },0)
 
         switch (detectColision()){
             case FOOD_COLISION:
+                paintScore(1)
                 document.getElementById('foodSound').play()
                 addSegmentToSnake(1,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
-                score++
                 break;
             case SPECIAL_FOOD_COLISION:
+                paintScore(9)
                 document.getElementById('specialfoodSound').play()
                 addSegmentToSnake(2,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
-                score+= 9
                 break
             case SELF_COLISION:
                 document.getElementById('gameoverSound').play()
@@ -171,31 +175,56 @@ async function turnOnSpecialFood() {
 function setEventHandle() {
     
     document.addEventListener("keydown",(e)=>{
-        
-        const head = snake[0]
-        clearTimerMove()
-        switch (e.key) {
-            case 'ArrowRight':
-                clearRotateHead()
-                head.classList.add('fa-rotate-90')
-                actualDirection = DIR_RIGHT
-                break;
-            case 'ArrowDown':
-                clearRotateHead()
-                head.classList.add('fa-rotate-180')
-                actualDirection = DIR_DOWN
-                break;
-            case 'ArrowLeft':
-                clearRotateHead()
-                head.classList.add('fa-rotate-270')
-                actualDirection = DIR_LEFT
-                break;
-            case 'ArrowUp':
-                actualDirection = DIR_UP
-                clearRotateHead()
-                break;
+        if (gameStatus === GAME_STATUS_PLAY) {
+            const head = snake[0]
+            clearTimerMove()
+            switch (e.key) {
+                case 'ArrowRight':
+                    clearRotateHead()
+                    head.classList.add('fa-rotate-90')
+                    actualDirection = DIR_RIGHT
+                    break;
+                case 'ArrowDown':
+                    clearRotateHead()
+                    head.classList.add('fa-rotate-180')
+                    actualDirection = DIR_DOWN
+                    break;
+                case 'ArrowLeft':
+                    clearRotateHead()
+                    head.classList.add('fa-rotate-270')
+                    actualDirection = DIR_LEFT
+                    break;
+                case 'ArrowUp':
+                    actualDirection = DIR_UP
+                    clearRotateHead()
+                    break;
+            }
+            move(actualDirection).then(resp=>{handleTimerMove=resp})
         }
-        move(actualDirection).then(resp=>{handleTimerMove=resp})
+    })
+
+    document.getElementById('play').addEventListener( "click",function(){
+        if (this.classList.contains('fa-play')) {
+            this.classList.remove('fa-play')
+            this.classList.add('fa-pause')
+            play()
+        } else {
+            this.classList.remove('fa-pause')
+            this.classList.add('fa-play')
+            pause()
+        }
+    })
+
+    document.getElementById('stop').addEventListener('click',()=>{stop()})
+
+    document.getElementById('volume').addEventListener('click',function(){
+        if (this.classList.contains('fa-volume-up')) {
+            this.classList.remove('fa-volume-up')
+            this.classList.add('fa-volume-mute')
+        } else {
+            this.classList.remove('fa-volume-mute')
+            this.classList.add('fa-volume-up')
+        }
     })
 }
 
@@ -250,10 +279,10 @@ function detectColision(){
             return SPECIAL_FOOD_COLISION
     }
 
-    if(head.offsetLeft === board.offsetLeft ||
-       head.offsetTop === board.offsetTop ||
-       head.offsetLeft + 16 === board.offsetWidth ||
-       head.offsetTop + 16 === board.offsetHeight) {
+    if(head.offsetLeft < board.offsetLeft ||
+       head.offsetTop < board.offsetTop ||
+       head.offsetLeft + 16 > board.offsetWidth ||
+       head.offsetTop + 16 > board.offsetHeight) {
             return BORDER_COLISION
     }
 
@@ -292,4 +321,65 @@ function addSegmentToSnake(number, left, top) {
         l = (segment.offsetLeft - snake[snake.length - 2].offsetLeft) + segment.offsetLeft + 'px'
     }
     
+}
+
+function pause() {
+    gameStatus = GAME_STATUS_PAUSE
+    clearTimerMove()
+    clearTimerMoveFood()
+    clearTimerTurnOnSpecialFruit()
+}
+
+function play() {
+    gameStatus = GAME_STATUS_PLAY
+    showFood(isSpecialFood) 
+    turnOnSpecialFood().then(resp=>{handleTimerTurnOnSpecialFood=resp})
+    move(actualDirection).then(resp=>{handleTimerMove=resp})
+}
+
+function stop() {
+    let board = document.getElementById('board')
+    let playButton = document.getElementById('play')
+    let food = document.getElementById('food')
+    let specialFood = document.getElementById('special-food-container')
+    pause()
+    gameStatus = GAME_STATUS_STOPED
+    snake = snake.map((v,i)=>{
+        if(i!==0){
+            snake[i].remove()
+        } else {
+            return v
+        }
+    }).filter((v,i)=>{
+        if(i===0){
+            return v
+        }
+    })
+    clearRotateHead()
+    snake[0].classList.add('fa-rotate-90')
+    snake[0].style.left = '0px';
+    snake[0].style.top = '0px'
+    board.style.width = '800px'
+    board.style.height = '800px'
+    actualDirection = DIR_RIGHT
+    if (playButton.classList.contains('fa-pause')) {
+        playButton.classList.remove('fa-pause')
+        playButton.classList.add('fa-play')
+    }
+    score = -1
+    paintScore(1)
+
+    food.style.top = '-50px'
+    specialFood.style.top = '-50px'
+}
+
+function paintScore(addScore) {
+    let scorePanel = document.getElementById('score')
+    score += addScore
+    let scoreText = score.toString()
+    for(i=0;i<(4-score.toString().length);i++){
+        scoreText = '0' + scoreText
+    }
+
+    scorePanel.innerHTML = scoreText
 }

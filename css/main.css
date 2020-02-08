@@ -42,3 +42,29 @@
 #special-food {
     font-size: 25px;
 }
+
+#controls-panel{
+    position: absolute;
+    background-color: #a1cdf1;
+    color: white;
+    border-radius:5px;
+    padding: 5px;
+    font-size: 14px;
+    left: 815px;
+    top: 15px;
+    width: auto;
+}
+
+#controls-panel i{
+    padding: 1px 5px;
+    cursor: pointer;
+}
+
+#score {
+    background-color: white;
+    height: 20px;
+    width: 80px;
+    color: black;
+    padding: 2px;
+    border-radius: 2px;
+}
