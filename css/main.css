@@ -31,8 +31,14 @@
     font-size: 16px;
 }
 
-#special-food {
+#special-food-container {
     position:absolute;
     color: black;
-    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    padding: 1px;
+}
+
+#special-food {
+    font-size: 25px;
 }

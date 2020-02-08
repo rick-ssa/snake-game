@@ -15,8 +15,8 @@ const SELF_COLISION = 4;
 const MIN_SHOW_TIME_FOOD = 4
 const MAX_SHOW_TIME_FOOD = 10
 
-const MIN_SHOW_TIME_SPECIAL_FOOD = 1
-const MAX_SHOW_TIME_SPECIAL_FOOD = 5
+const MIN_SHOW_TIME_SPECIAL_FOOD = 4
+const MAX_SHOW_TIME_SPECIAL_FOOD = 10
 
 const FOOD_SIZE = 16;
 const SPECIAL_FOOD_SIZE = 28;
@@ -39,10 +39,9 @@ let handleTimerTurnOnSpecialFood;
 
 let actualDirection = DIR_RIGHT
 
-let isSpecialFood
+let isSpecialFood = true
 
 function config_init() {
-    isSpecialFood = false
     setEventHandle()
     snake.push(document.getElementById('snake-head'))
     showFood(isSpecialFood) 
@@ -91,7 +90,10 @@ async function move(direction){
                 showFood(isSpecialFood)
                 break;
             case SPECIAL_FOOD_COLISION:
-
+                console.log('hi')
+                addSegmentToSnake(2,beforeLeft,beforeTop)
+                clearTimerMoveFood()
+                showFood(isSpecialFood)
         }
 
         move(actualDirection).then(resp=>{handleTimerMove=resp})
@@ -106,20 +108,20 @@ async function showFood(special=false) {
         let minTime
         let maxTime
         let board = document.getElementById('board')
-
+        
         if (special) {
-            food = document.getElementById('special-food')
+            food = document.getElementById('special-food-container')
             otherFood = document.getElementById('food')
             foodSize = SPECIAL_FOOD_SIZE
-            
-            food.classList.remove(`fa-${lastSpecialFoodType}`)
+            console.log(food.childNodes[1])
+            food.childNodes[1].classList.remove(`fa-${lastSpecialFoodType}`)
             lastSpecialFoodType = SPECIAL_FOOD_TYPE[Math.floor(Math.random() * 9)]
-            food.classList.add(`fa-${lastSpecialFoodType}`)
+            food.childNodes[1].classList.add(`fa-${lastSpecialFoodType}`)
             minTime = MIN_SHOW_TIME_SPECIAL_FOOD
             maxTime = MAX_SHOW_TIME_SPECIAL_FOOD
         } else {
             food = document.getElementById('food')
-            otherFood = document.getElementById('special-food')
+            otherFood = document.getElementById('special-food-container')
             foodSize = FOOD_SIZE
             minTime = MIN_SHOW_TIME_FOOD
             maxTime = MAX_SHOW_TIME_FOOD
@@ -134,7 +136,7 @@ async function showFood(special=false) {
 
         document.getElementById('direction').innerHTML = `${left}, ${top}`
 
-        moveFood(minTime,maxTime).then((resp)=>{handleTimerMoveFood=resp; console.log(handleTimerMoveFood)})
+        moveFood(minTime,maxTime).then((resp)=>{handleTimerMoveFood=resp})
 }
 
 async function moveFood(minTime, maxTime) {
@@ -142,7 +144,7 @@ async function moveFood(minTime, maxTime) {
     
     return await setTimeout(()=>{
         showFood(isSpecialFood)
-        isSpecialFood = isSpecialFood ? false : isSpecialFood
+        // isSpecialFood = isSpecialFood ? false : isSpecialFood
     },timer * 1000)
 }
 
@@ -218,7 +220,7 @@ function clearRotateHead() {
 function detectColision(){
     let food = document.getElementById('food')
     let head = snake[0]
-    let specialFood = document.getElementById('special-food')
+    let specialFoodContainer = document.getElementById('special-food-container')
     let board = document.getElementById('board')
 
     if (head.style.left === food.style.left && 
@@ -226,8 +228,16 @@ function detectColision(){
             return FOOD_COLISION;
     }
 
-    if ((head.offsetLeft >= specialFood.offsetLeft && head.offsetLeft <= specialFood.offsetLeft + 28) && 
-        (head.offsetTop >= specialFood.offsetTop && head.offsetTop <= specialFood.offsetTop + 28)) {
+    if (
+        ((head.offsetLeft >= specialFoodContainer.offsetLeft && head.offsetLeft <= specialFoodContainer.offsetLeft + 28) && 
+        (head.offsetTop >= specialFoodContainer.offsetTop && head.offsetTop <= specialFoodContainer.offsetTop + 28)) ||
+        ((head.offsetLeft + 16 >= specialFoodContainer.offsetLeft && head.offsetLeft + 16 <= specialFoodContainer.offsetLeft + 28) && 
+        (head.offsetTop >= specialFoodContainer.offsetTop && head.offsetTop <= specialFoodContainer.offsetTop + 28)) ||
+        ((head.offsetLeft >= specialFoodContainer.offsetLeft && head.offsetLeft <= specialFoodContainer.offsetLeft + 28) && 
+        (head.offsetTop + 16 >= specialFoodContainer.offsetTop && head.offsetTop + 16 <= specialFoodContainer.offsetTop + 28)) ||
+        ((head.offsetLeft + 16 >= specialFoodContainer.offsetLeft && head.offsetLeft + 16 <= specialFoodContainer.offsetLeft + 28) && 
+        (head.offsetTop + 16 >= specialFoodContainer.offsetTop && head.offsetTop + 16 <= specialFoodContainer.offsetTop + 28)) 
+    ) {
             return SPECIAL_FOOD_COLISION
     }
 
@@ -254,14 +264,23 @@ function detectColision(){
 }
 
 function addSegmentToSnake(number, left, top) {
-    let segment = document.createElement('i')
-    segment.classList.add('fas')
-    segment.classList.add('fa-square')
-    segment.classList.add('snake-body')
-    segment.style.left = left;
-    segment.style.top = top
+    let l = left
+    let t = top
 
-    document.getElementById('board').appendChild(segment)
+    for(let i=0; i<number; i++) {
+        let segment = document.createElement('i')
+        segment.classList.add('fas')
+        segment.classList.add('fa-square')
+        segment.classList.add('snake-body')
+        segment.style.left = l;
+        segment.style.top = t
 
-    snake.push(segment)
+        document.getElementById('board').appendChild(segment)
+
+        snake.push(segment)
+
+        t = (segment.offsetTop - snake[snake.length - 2].offsetTop) + segment.offsetTop + 'px'
+        l = (segment.offsetLeft - snake[snake.length - 2].offsetLeft) + segment.offsetLeft + 'px'
+    }
+    
 }
