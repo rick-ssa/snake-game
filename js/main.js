@@ -12,12 +12,43 @@ const SPECIAL_FOOD_COLISION = 2;
 const BORDER_COLISION = 3;
 const SELF_COLISION = 4;
 
+const MIN_SHOW_TIME_FOOD = 4
+const MAX_SHOW_TIME_FOOD = 10
 
+const MIN_SHOW_TIME_SPECIAL_FOOD = 1
+const MAX_SHOW_TIME_SPECIAL_FOOD = 5
+
+const FOOD_SIZE = 16;
+const SPECIAL_FOOD_SIZE = 28;
+
+SPECIAL_FOOD_TYPE = ['hamburger','carrot','fish','drumstick-bite',
+                      'egg','cheese','hotdog','ice-cream', 'pizza-slice']
+
+const COLORS = ['darkmagenta','purple','slateblue','darkslateblue', 
+                'firebrick', 'darkred', 'orangered','seagreen', 
+                'darkgreen','teal','steelblue','navy','maroon', 'dimgray']
 let snake = []
+
+let lastSpecialFoodType = 'hamburger'
 
 let handleTimerMove;
 
+let handleTimerMoveFood;
+
+let handleTimerTurnOnSpecialFood;
+
 let actualDirection = DIR_RIGHT
+
+let isSpecialFood
+
+function config_init() {
+    isSpecialFood = false
+    setEventHandle()
+    snake.push(document.getElementById('snake-head'))
+    showFood(isSpecialFood) 
+    turnOnSpecialFood().then(resp=>{handleTimerTurnOnSpecialFood=resp})
+    move(actualDirection).then(resp=>{handleTimerMove=resp})
+}
 
 async function move(direction){
     
@@ -53,15 +84,16 @@ async function move(direction){
             return v
         })
 
-        switch (detectColision){
+        switch (detectColision()){
             case FOOD_COLISION:
                 addSegmentToSnake(1,beforeLeft,beforeTop)
+                clearTimerMoveFood()
+                showFood(isSpecialFood)
                 break;
             case SPECIAL_FOOD_COLISION:
-                
+
         }
 
-        console.log(detectColision())
         move(actualDirection).then(resp=>{handleTimerMove=resp})
     
     },SNAKE_SPEED)
@@ -69,33 +101,61 @@ async function move(direction){
 
 async function showFood(special=false) {
         let food
+        let otherFood
+        let foodSize
+        let minTime
+        let maxTime
+        let board = document.getElementById('board')
+
         if (special) {
             food = document.getElementById('special-food')
+            otherFood = document.getElementById('food')
+            foodSize = SPECIAL_FOOD_SIZE
+            
+            food.classList.remove(`fa-${lastSpecialFoodType}`)
+            lastSpecialFoodType = SPECIAL_FOOD_TYPE[Math.floor(Math.random() * 9)]
+            food.classList.add(`fa-${lastSpecialFoodType}`)
+            minTime = MIN_SHOW_TIME_SPECIAL_FOOD
+            maxTime = MAX_SHOW_TIME_SPECIAL_FOOD
         } else {
             food = document.getElementById('food')
+            otherFood = document.getElementById('special-food')
+            foodSize = FOOD_SIZE
+            minTime = MIN_SHOW_TIME_FOOD
+            maxTime = MAX_SHOW_TIME_FOOD
         }
         
-        let left = (Math.floor(Math.random() * 24) + 1) * 16
-        let top = (Math.floor(Math.random() * 24) + 1) * 16
+        let left = (Math.floor(Math.random() * (Math.floor(board.offsetWidth/foodSize))-1) + 1) * foodSize
+        let top = (Math.floor(Math.random() * (Math.floor(board.offsetHeight/foodSize))-1) + 1) * foodSize
+        food.style.color = COLORS[Math.floor(Math.random() * 14)]
+        otherFood.style.top = '-50px';
         food.style.left=left + 'px';
         food.style.top=top + 'px';
-        hideFood(special) 
+
+        document.getElementById('direction').innerHTML = `${left}, ${top}`
+
+        moveFood(minTime,maxTime).then((resp)=>{handleTimerMoveFood=resp; console.log(handleTimerMoveFood)})
 }
 
-async function hideFood(special) {
-    let timer = Math.floor(Math.random() * 7) + 4
+async function moveFood(minTime, maxTime) {
+    let timer = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime
     
     return await setTimeout(()=>{
-        showFood(special)
+        showFood(isSpecialFood)
+        isSpecialFood = isSpecialFood ? false : isSpecialFood
     },timer * 1000)
 }
 
-function config_init() {
-    setEventHandle()
-    snake.push(document.getElementById('snake-head'))
-    showFood() 
-    move(actualDirection).then(resp=>resp).then(resp=>{handleTimerMove=resp})
+async function turnOnSpecialFood() {
+    let timer = (Math.floor(Math.random() * 60)) + 60 * 1000
+    return await setTimeout(() => {
+        
+        isSpecialFood = true
+        turnOnSpecialFood().then((resp)=>{handleTimerTurnOnSpecialFood=resp})
+    },timer) ;
 }
+
+
 
 function setEventHandle() {
     
@@ -130,6 +190,14 @@ function setEventHandle() {
 
 function clearTimerMove() {
     clearTimeout(handleTimerMove)
+}
+
+function clearTimerMoveFood() {
+    clearTimeout(handleTimerMoveFood)
+}
+
+function clearTimerTurnOnSpecialFruit() {
+    clearTimeout(handleTimerTurnOnSpecialFood)
 }
 
 function clearRotateHead() {
