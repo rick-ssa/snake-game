@@ -87,18 +87,21 @@ async function move(direction){
 
         switch (detectColision()){
             case FOOD_COLISION:
+                document.getElementById('foodSound').play()
                 addSegmentToSnake(1,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
                 score++
                 break;
             case SPECIAL_FOOD_COLISION:
-                console.log('hi')
+                document.getElementById('specialfoodSound').play()
                 addSegmentToSnake(2,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
                 score+= 9
                 break
+            case SELF_COLISION:
+                document.getElementById('gameoverSound').play()
         }
 
         move(actualDirection).then(resp=>{handleTimerMove=resp})
