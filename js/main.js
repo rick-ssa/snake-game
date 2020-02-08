@@ -102,6 +102,10 @@ async function move(direction){
                 break
             case SELF_COLISION:
                 document.getElementById('gameoverSound').play()
+                break
+            case BORDER_COLISION:
+                document.getElementById('borderColisionSound').play()
+                break
         }
 
         move(actualDirection).then(resp=>{handleTimerMove=resp})
