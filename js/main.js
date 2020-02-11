@@ -59,6 +59,10 @@ let isSpecialFood = false
 
 let score = 0
 
+let previousScore = 0
+
+let indexColor = 0
+
 let gameStatus = GAME_STATUS_STOPED
 
 function config_init() {
@@ -96,6 +100,7 @@ async function move(direction){
                 addSegmentToSnake(1,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
+                changeScoreColor()
                 break;
             case SPECIAL_FOOD_COLISION:
                 paintScore(9)
@@ -103,6 +108,7 @@ async function move(direction){
                 addSegmentToSnake(2,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
+                changeScoreColor()
                 break
             case SELF_COLISION:
                 // document.getElementById('gameoverSound').play()
@@ -210,7 +216,14 @@ function setEventHandle() {
                     clearRotateHead()
                     break;
             }
+
             move(actualDirection).then(resp=>{handleTimerMove=resp})
+        }
+
+        if(gameStatus===GAME_STATUS_STOPED) {
+            if(e.key==='ArrowRight' || e.key==='ArrowDown') {
+                play()
+            }
         }
     })
 
@@ -233,6 +246,10 @@ function setEventHandle() {
             this.classList.add('fa-volume-up')
         }
     })
+
+    document.getElementById('gameoverScreen').addEventListener('click',closeGameOverScreen)
+
+    document.getElementById('btPlayAgain').addEventListener('click',play)
 }
 
 function clearTimerMove() {
@@ -419,6 +436,7 @@ function play() {
     btPlay.classList.remove('fa-play')
     btPlay.classList.add('fa-pause')
     gameStatus = GAME_STATUS_PLAY
+    document.getElementById('score').style.color = 'black'
     showFood(isSpecialFood) 
     turnOnSpecialFood().then(resp=>{handleTimerTurnOnSpecialFood=resp})
     move(actualDirection).then(resp=>{handleTimerMove=resp})
@@ -459,17 +477,43 @@ function stop() {
 function gameOver() {
     pause()
     gameStatus = GAME_STATUS_OVER
+    previousScore = score
+    document.getElementById('previousScore').innerHTML = formatScoreText(previousScore)
+    showGameOverScreen()
+}
+
+function changeScoreColor() {
+    let spanScore = document.getElementById('score')
+    if(score>previousScore && previousScore !== 0) {
+        spanScore.style.color = 'red'
+    }
+}
+
+function showGameOverScreen() {
+    let scrn = document.getElementById('gameoverScreen');
+    scrn.style.left = 0
+    scrn.style.right = 0
+    scrn.style.opacity = 1
+}
+
+function closeGameOverScreen() {
+    let scrn = document.getElementById('gameoverScreen');
+    scrn.style.opacity = 0 
+    setTimeout(()=>{scrn.style.left='-5000px'; scrn.style.right = '5000px'},500)   
 }
 
 function paintScore(addScore) {
     let scorePanel = document.getElementById('score')
     score += addScore
-    let scoreText = score.toString()
-    for(i=0;i<(4-score.toString().length);i++){
-        scoreText = '0' + scoreText
-    }
+    scorePanel.innerHTML = formatScoreText(score)
+}
 
-    scorePanel.innerHTML = scoreText
+function formatScoreText(number){
+    let text = number.toString()
+    for(i=0;i<(4-number.toString().length);i++){
+        text = '0' + text
+    }
+    return text
 }
 
 function translateSnakeBody(beforeLeft,beforeTop) {

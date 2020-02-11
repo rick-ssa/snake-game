@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="css/main.css">
     </head>
     <body onload='config_init()'>
-
+        <div id="gameoverScreen"> GAME OVER<button id='btPlayAgain'>Play again</button></div>
         <div id='board'>
             
             <i id='food' style='left:-50px' class="fas fa-apple-alt"></i>
@@ -27,7 +27,8 @@
             <i id='play' class='fas fa-play'></i>
             <i id='stop' class='fas fa-stop'></i>
             <i id='volume' class='fas fa-volume-up' style='display:none'></i>
-            <span id="score">0000</span>
+            score: <span id='score' class="score">0000</span> 
+            previous score:<span id='previousScore' class="score">0000</span>
         </div>
         
         
