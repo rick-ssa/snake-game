@@ -92,20 +92,20 @@ async function move(direction){
         switch (detectColision()){
             case FOOD_COLISION:
                 paintScore(1)
-                document.getElementById('foodSound').play()
+                // document.getElementById('foodSound').play()
                 addSegmentToSnake(1,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
                 break;
             case SPECIAL_FOOD_COLISION:
                 paintScore(9)
-                document.getElementById('specialfoodSound').play()
+                // document.getElementById('specialfoodSound').play()
                 addSegmentToSnake(2,beforeLeft,beforeTop)
                 clearTimerMoveFood()
                 showFood(isSpecialFood)
                 break
             case SELF_COLISION:
-                document.getElementById('gameoverSound').play()
+                // document.getElementById('gameoverSound').play()
                 gameOver()
                 return null
             case BORDER_COLISION:
@@ -113,7 +113,13 @@ async function move(direction){
                 snakeReverse(detectBorderColisionSide())
                 board.style.width = board.offsetWidth - 113 + 'px'
                 board.style.height = board.offsetHeight - 113 + 'px'
-                document.getElementById('borderColisionSound').play()
+                clearTimerMoveFood()
+                showFood()
+                if(board.offsetHeight<100) {
+                    gameOver()
+                    return null
+                }
+                // document.getElementById('borderColisionSound').play()
                 break
         }
 
@@ -451,9 +457,7 @@ function stop() {
 }
 
 function gameOver() {
-    let btPlay = document.getElementById('play')
     pause()
-    console.log(btPlay.classList)
     gameStatus = GAME_STATUS_OVER
 }
 
@@ -526,6 +530,48 @@ function snakeReverse(borderColisionSide) {
             }
             snake[0].classList.add('fa-rotate-270')
             actualDirection = DIR_LEFT
+            break
+
+        case BORDER_COLISION_BOTTOM:
+            switch(detectCorner(borderColisionSide)){
+                case RIGHT_BOTTOM_CORNER:
+                    snake.map((v)=>{
+                        v.style.left = v.offsetLeft - 128 + 'px'
+                        v.style.top = v.offsetTop - 128 + 'px'
+                        return v
+                    })
+                    snake[0].style.top = snake[0].offsetTop - 32 + 'px'
+                    snake[0].style.left = snake[0].offsetLeft - 16 + 'px'
+                    translateSnakeBody(snake[0].style.left ,snake[0].offsetTop + 16 + 'px')
+                default:
+                    snake.map((v)=>{
+                        v.style.top = v.offsetTop - 128 + 'px'
+                        return v
+                    })
+                    snake[0].style.top = snake[0].offsetTop - 32 + 'px'
+                    snake[0].style.left = snake[0].offsetLeft + 16 + 'px'
+                    translateSnakeBody(snake[0].style.left ,snake[0].offsetTop + 16 + 'px')
+            }
+            actualDirection = DIR_UP
+            break
+
+        case BORDER_COLISION_LEFT:
+            switch(detectCorner(borderColisionSide)){
+                case LEFT_BOTTOM_CORNER:
+                    snake.map((v)=>{
+                        v.style.top = v.offsetTop - 128 + 'px'
+                        return v
+                    })
+                    snake[0].style.top = snake[0].offsetTop - 16 + 'px'
+                    snake[0].style.left = snake[0].offsetLeft + 32 + 'px'
+                    translateSnakeBody(snake[0].offsetLeft - 16 + 'px' ,snake[0].style.top)
+                default:
+                    snake[0].style.top = snake[0].offsetTop + 16 + 'px'
+                    snake[0].style.left = snake[0].offsetLeft + 32 + 'px'
+                    translateSnakeBody(snake[0].offsetLeft - 16 + 'px' ,snake[0].style.top)
+            }
+            snake[0].classList.add('fa-rotate-90')
+            actualDirection = DIR_RIGHT
             break
                 
     }
