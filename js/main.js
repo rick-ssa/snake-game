@@ -26,6 +26,17 @@ const GAME_STATUS_PLAY = 1
 const GAME_STATUS_PAUSE = 2
 const GAME_STATUS_OVER = 3
 
+const BORDER_COLISION_TOP = 0
+const BORDER_COLISION_RIGHT = 1
+const BORDER_COLISION_BOTTOM = 2
+const BORDER_COLISION_LEFT = 3
+
+const NONE_CORNER = 0
+const RIGHT_TOP_CORNER = 1
+const RIGHT_BOTTOM_CORNER = 2
+const LEFT_TOP_CORNER = 3
+const LEFT_BOTTOM_CORNER = 4
+
 SPECIAL_FOOD_TYPE = ['hamburger','carrot','fish','drumstick-bite',
                       'egg','cheese','hotdog','ice-cream', 'pizza-slice']
 
@@ -76,18 +87,7 @@ async function move(direction){
                 break;
         }
 
-        snake = snake.map((v,i)=>{
-            if(i!==0) {
-                let tempL = v.style.left
-                let tempT = v.style.top
-                v.style.left = beforeLeft
-                v.style.top = beforeTop
-
-                beforeLeft = tempL
-                beforeTop = tempT
-            }
-            return v
-        },0)
+        snake = translateSnakeBody(beforeLeft,beforeTop)
 
         switch (detectColision()){
             case FOOD_COLISION:
@@ -106,8 +106,13 @@ async function move(direction){
                 break
             case SELF_COLISION:
                 document.getElementById('gameoverSound').play()
-                break
+                gameOver()
+                return null
             case BORDER_COLISION:
+                let board = document.getElementById('board')
+                snakeReverse(detectBorderColisionSide())
+                board.style.width = board.offsetWidth - 113 + 'px'
+                board.style.height = board.offsetHeight - 113 + 'px'
                 document.getElementById('borderColisionSound').play()
                 break
         }
@@ -205,12 +210,8 @@ function setEventHandle() {
 
     document.getElementById('play').addEventListener( "click",function(){
         if (this.classList.contains('fa-play')) {
-            this.classList.remove('fa-play')
-            this.classList.add('fa-pause')
             play()
         } else {
-            this.classList.remove('fa-pause')
-            this.classList.add('fa-play')
             pause()
         }
     })
@@ -301,6 +302,77 @@ function detectColision(){
     return NONE_COLISION
 }
 
+function detectBorderColisionSide() {
+    let head = snake[0]
+    let board = document.getElementById('board')
+
+    if(head.offsetLeft < board.offsetLeft) {
+        return BORDER_COLISION_LEFT
+    }
+
+    if(head.offsetLeft + 16 > board.offsetWidth) {
+        return BORDER_COLISION_RIGHT
+    }
+
+    if(head.offsetTop < board.offsetTop) {
+        return BORDER_COLISION_TOP
+    }
+
+    if(head.offsetTop + 16 > board.offsetHeight) {
+        return BORDER_COLISION_BOTTOM
+    }
+}
+
+function detectCorner(borderColision) {
+    let head = snake    [0]
+    let board = document.getElementById('board')
+    switch(borderColision) {
+        case BORDER_COLISION_RIGHT:
+            if(head.offsetTop===0) {
+                return RIGHT_TOP_CORNER
+            }
+
+            if(head.offsetTop + 32 > board.offsetHeight){
+                return RIGHT_BOTTOM_CORNER
+            }
+
+            return NONE_CORNER
+
+        case BORDER_COLISION_LEFT:
+            if(head.offsetTop ===0) {
+                return LEFT_TOP_CORNER
+            }
+
+            if(head.offsetTop + 32 > board.offsetHeight) {
+                return LEFT_BOTTOM_CORNER
+            }
+
+            return NONE_CORNER
+
+        case BORDER_COLISION_BOTTOM:
+            if(head.offsetLeft===0) {
+                return LEFT_BOTTOM_CORNER
+            }
+
+            if(head.offsetLeft + 32 > board.offsetWidth) {
+                return RIGHT_BOTTOM_CORNER
+            }
+
+            return NONE_CORNER
+
+        case BORDER_COLISION_TOP:
+            if(head.offsetLeft === 0) {
+                return LEFT_TOP_CORNER
+            }
+
+            if(head.offsetLeft + 32 > board.offsetWidth) {
+                return RIGHT_TOP_CORNER
+            }
+        default:
+            return NONE_CORNER
+    }
+}
+
 function addSegmentToSnake(number, left, top) {
     let l = left
     let t = top
@@ -324,6 +396,9 @@ function addSegmentToSnake(number, left, top) {
 }
 
 function pause() {
+    let btPlay = document.getElementById('play')
+    btPlay.classList.remove('fa-pause')
+    btPlay.classList.add('fa-play')
     gameStatus = GAME_STATUS_PAUSE
     clearTimerMove()
     clearTimerMoveFood()
@@ -331,6 +406,12 @@ function pause() {
 }
 
 function play() {
+    let btPlay = document.getElementById('play')
+    if(gameStatus===GAME_STATUS_OVER) {
+        stop()
+    }
+    btPlay.classList.remove('fa-play')
+    btPlay.classList.add('fa-pause')
     gameStatus = GAME_STATUS_PLAY
     showFood(isSpecialFood) 
     turnOnSpecialFood().then(resp=>{handleTimerTurnOnSpecialFood=resp})
@@ -362,15 +443,18 @@ function stop() {
     board.style.width = '800px'
     board.style.height = '800px'
     actualDirection = DIR_RIGHT
-    if (playButton.classList.contains('fa-pause')) {
-        playButton.classList.remove('fa-pause')
-        playButton.classList.add('fa-play')
-    }
+
     score = -1
     paintScore(1)
-
     food.style.top = '-50px'
     specialFood.style.top = '-50px'
+}
+
+function gameOver() {
+    let btPlay = document.getElementById('play')
+    pause()
+    console.log(btPlay.classList)
+    gameStatus = GAME_STATUS_OVER
 }
 
 function paintScore(addScore) {
@@ -383,3 +467,67 @@ function paintScore(addScore) {
 
     scorePanel.innerHTML = scoreText
 }
+
+function translateSnakeBody(beforeLeft,beforeTop) {
+    return snake.map((v,i)=>{
+        if(i!==0) {
+            let tempL = v.style.left
+            let tempT = v.style.top
+            v.style.left = beforeLeft
+            v.style.top = beforeTop
+
+            beforeLeft = tempL
+            beforeTop = tempT
+        }
+        return v
+    })
+}
+
+function snakeReverse(borderColisionSide) {
+    clearRotateHead()
+    switch(borderColisionSide) {
+        case BORDER_COLISION_TOP:
+            switch(detectCorner(borderColisionSide)){
+                case RIGHT_TOP_CORNER:
+                    snake.map((v)=>{
+                        v.style.left = v.offsetLeft - 128 + 'px'
+                        return v
+                    })
+                    snake[0].style.top = snake[0].offsetTop + 32 + 'px'
+                    snake[0].style.left = snake[0].offsetLeft - 16 + 'px'
+                    translateSnakeBody(snake[0].style.left,snake[0].offsetTop - 16 + 'px')
+                default:
+                    snake[0].style.top = snake[0].offsetTop + 32 + 'px'
+                    snake[0].style.left = snake[0].offsetLeft + 16 + 'px'
+                    translateSnakeBody(snake[0].style.left,snake[0].offsetTop - 16 + 'px')
+            }
+            snake[0].classList.add('fa-rotate-180')
+            actualDirection = DIR_DOWN
+            break
+        case BORDER_COLISION_RIGHT:
+            switch(detectCorner(borderColisionSide)){
+                case RIGHT_BOTTOM_CORNER:
+                    snake.map((v)=>{
+                        v.style.left = v.offsetLeft - 128 + 'px'
+                        v.style.top = v.offsetTop - 128 + 'px'
+                        return v
+                    })
+                    snake[0].style.top = snake[0].offsetTop - 16 + 'px'
+                    snake[0].style.left = snake[0].offsetLeft - 32 + 'px'
+                    translateSnakeBody(snake[0].offsetLeft + 16 + 'px',snake[0].style.top)
+                default:
+                    snake.map((v)=>{
+                        v.style.left = v.offsetLeft - 128 + 'px'
+                        return v
+                    })
+                    snake[0].style.top = snake[0].offsetTop + 16 + 'px'
+                    snake[0].style.left = snake[0].offsetLeft - 32 + 'px'
+                    translateSnakeBody(snake[0].offsetLeft + 16 + 'px',snake[0].style.top)
+            }
+            snake[0].classList.add('fa-rotate-270')
+            actualDirection = DIR_LEFT
+            break
+                
+    }
+}
+
